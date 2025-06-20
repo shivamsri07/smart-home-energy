@@ -20,4 +20,4 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     # Relationship to devices (for future use)
-    # devices = relationship("Device", back_populates="owner", cascade="all, delete-orphan")
+    devices = relationship("Device", back_populates="owner", cascade="all, delete-orphan")
