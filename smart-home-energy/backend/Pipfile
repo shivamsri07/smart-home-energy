@@ -13,6 +13,10 @@ psycopg2-binary = "*"
 python-jose = "*"
 pydantic-settings = "*"
 email-validator = "*"
+httpx = "*"
+passlib = "*"
+python-multipart = "*"
+bcrypt = "*"
 
 [dev-packages]
 
