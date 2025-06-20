@@ -1,0 +1,11 @@
+Git Tag,Milestone,Description,Estimated Hours
+v0.1,Foundation & Auth Service,"1. Set up project structure, Docker, and DB. 2. Implement User model. 3. Build /register and /login endpoints. 4. Secure endpoints with JWTs.",4 hours
+v0.2,Telemetry Service,1. Implement Device and Telemetry models. 2. Create the POST /telemetry endpoint for data ingestion. 3. Add basic auth checks to the endpoint.,3 hours
+v0.3,Initial Frontend & Login,1. Set up basic React SPA with routing. 2. Build Login/Register pages. 3. Implement token-based auth flow (storing JWT).,5 hours
+v0.4,Deterministic Query Engine,1. Build the rules-based parser for the AI service. 2. Implement POST /query endpoint (deterministic path only). 3. Write unit tests for the parser logic.,4 hours
+v0.5,Frontend Dashboard,1. Create a device list page. 2. Build a dashboard view with a chart to visualize telemetry data fetched from a basic API endpoint.,4 hours
+v0.6,LLM Fallback Integration,"1. Integrate an LLM client (e.g., OpenAI, Gemini). 2. Implement the fallback logic in the AI service. 3. Add robust prompt engineering and error handling.",3 hours
+v0.7,Full-Stack Integration,1. Connect the frontend's natural language input to the /query API. 2. Display structured responses gracefully in the UI. 3. End-to-end testing and refinement.,3 hours
+v0.8,Documentation & Cleanup,1. Write comprehensive README. 2. Generate and polish API documentation (Swagger/OpenAPI). 3. Code cleanup and final review.,2 hours
+v1.0,Release,- Final stable version of the prototype.,-
+Total,,,28 hours
