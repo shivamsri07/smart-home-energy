@@ -8,6 +8,8 @@ from app.models.user import User
 from app.models.device import Device, Telemetry
 from ..auth.dependencies import get_current_user
 from . import schemas
+from datetime import datetime, timezone, timedelta
+from sqlalchemy import func
 
 telemetry_router = APIRouter(
     prefix="/telemetry",
