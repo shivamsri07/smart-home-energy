@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # --- LLM Integration Settings (for future use) ---
     # We can define them now so the application is aware of them.
     # The `| None = None` makes them optional.
-    OPENAI_API_KEY: str | None = None
+    ANTHROPIC_API_KEY: str | None = None
     
     # --- Pydantic Settings Configuration ---
     # This tells pydantic-settings to load variables from a .env file
