@@ -32,8 +32,5 @@ COPY ./app ./app
 COPY ./alembic ./alembic
 COPY ./alembic.ini ./
 
-# Expose the port the app runs on. Note: We use the $PORT variable from Railway.
-EXPOSE 8000
-
 # The command to run the application. This replaces the Procfile.
-CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
+CMD ["hypercorn", "main:app", "--bind", "::"]
