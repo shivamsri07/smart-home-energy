@@ -20,6 +20,7 @@ app = FastAPI(
 origins = [
     "http://localhost:5173", # The address of our React frontend
     "http://localhost:3000", # A common alternative React dev port
+    "https://smart-home-energy-production.up.railway.app",
 ]
 
 app.add_middleware(
