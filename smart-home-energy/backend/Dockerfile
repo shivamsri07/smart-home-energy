@@ -14,5 +14,5 @@ COPY ./app ./app
 COPY ./alembic ./alembic
 COPY alembic.ini .
 
-CMD ["hypercorn", "main:app", "--bind", "::"]
+CMD ["hypercorn", "app.main:app", "--bind", "::"]
 
