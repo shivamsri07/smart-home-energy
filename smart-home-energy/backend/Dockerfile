@@ -1,7 +1,7 @@
 # --- Stage 1: The Builder ---
 # This stage installs all dependencies, including development ones,
 # and prepares a clean "packages" directory.
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
