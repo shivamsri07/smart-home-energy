@@ -36,4 +36,4 @@ COPY ./alembic.ini ./
 EXPOSE 8000
 
 # The command to run the application. This replaces the Procfile.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
