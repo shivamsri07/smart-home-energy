@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+  baseURL: import.meta.env.VITE_API_URL || 'https://smart-home-energy-production-5060.up.railway.app/api/v1'
 });
 
 // Use an interceptor to add the auth token to every request
