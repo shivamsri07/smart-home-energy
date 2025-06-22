@@ -3,6 +3,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './services/AuthContext';
 import Navbar from './components/layout/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from "@/components/ui/sonner"
 
 
@@ -11,6 +12,7 @@ import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
 import DashboardPage from './features/dashboard/DashboardPage';
 import DeviceDetailsPage from './features/dashboard/DeviceDetailsPage'; // <-- Add import
+import ConversationPage from './features/conversation/ConversationPage';
 
 
 function App() {
@@ -29,7 +31,14 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/device/:deviceId" element={<DeviceDetailsPage />} />
-
+          <Route 
+            path="/conversation" 
+            element={
+              <ProtectedRoute>
+                <ConversationPage />
+              </ProtectedRoute>
+            } 
+          />
           {/* You can add more routes here later, like for a specific device page */}
           {/* e.g., <Route path="/device/:id" element={<DeviceDetailsPage />} /> */}
         </Routes>

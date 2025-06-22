@@ -41,6 +41,14 @@ export default function Navbar() {
         >
           Dashboard
         </Link>
+        {isAuthenticated && (
+          <Link
+            to="/conversation"
+            className="text-foreground transition-colors hover:text-foreground"
+          >
+            Conversation
+          </Link>
+        )}
       </nav>
       {/* This is for the mobile menu */}
       <Sheet>
@@ -60,6 +68,11 @@ export default function Navbar() {
               <span className="sr-only">Smart Home Inc</span>
             </Link>
             <Link to="/">Dashboard</Link>
+            {isAuthenticated && (
+              <Link to="/conversation" className="text-muted-foreground transition-colors hover:text-foreground">
+                Conversation
+              </Link>
+            )}
           </nav>
         </SheetContent>
       </Sheet>

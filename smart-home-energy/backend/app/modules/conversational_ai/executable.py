@@ -63,7 +63,8 @@ class RawSQLExecutable(ExecutableQuery):
         params = {"user_id": str(user.id)}
         print(f"params: {params}")
         result_proxy = db.execute(text(self.sql_query), params)
-        print(f"result_proxy: {result_proxy}")
         results = [row._asdict() for row in result_proxy]
+
+        print(f"results: {results}")
         
         return {"metric": "RAW_SQL", "data": results, "summary_template": self.summary_template, "sql_query": self.sql_query}

@@ -1,8 +1,9 @@
 # backend/app/modules/telemetry/schemas.py
 
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel, Field
+from typing import List
 
 class TelemetryCreate(BaseModel):
     """
@@ -36,12 +37,18 @@ class DevicePublic(DeviceCreate):
     class Config:
         from_attributes = True
 
+class HourlyEnergyUsage(BaseModel):
+    """
+    Schema for hourly energy usage summary.
+    """
+    date: date
+    hour: int
+    total_energy: float
+
 class DeviceStats(BaseModel):
     """
-    Schema for returning aggregated device statistics.
+    Schema for returning hourly energy usage data for a device.
     """
     device_id: uuid.UUID
     time_period_days: int
-    max_usage: float | None
-    min_usage: float | None
-    avg_usage: float | None
+    hourly_usage: List[HourlyEnergyUsage]

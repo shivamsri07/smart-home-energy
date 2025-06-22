@@ -18,6 +18,7 @@ python-multipart = "*"
 passlib = "==1.7.4"
 bcrypt = "==3.2.0"
 anthropic = "*"
+requests = "*"
 
 [dev-packages]
 

@@ -12,8 +12,28 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to check if a JWT token is expired
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Date.now() / 1000;
+    return payload.exp < currentTime;
+  } catch (error) {
+    // If we can't parse the token, consider it expired
+    return true;
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('authToken'));
+  const [token, setToken] = useState<string | null>(() => {
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken && !isTokenExpired(storedToken)) {
+      return storedToken;
+    }
+    // Clear expired token
+    localStorage.removeItem('authToken');
+    return null;
+  });
 
   useEffect(() => {
     // This effect syncs the state with localStorage
@@ -22,6 +42,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else {
       localStorage.removeItem('authToken');
     }
+  }, [token]);
+
+  // Check token expiration on mount and set up periodic checks
+  useEffect(() => {
+    if (!token) return;
+
+    // Check if token is expired
+    if (isTokenExpired(token)) {
+      setToken(null);
+      return;
+    }
+
+    // Set up periodic token validation (check every 5 minutes)
+    const interval = setInterval(() => {
+      if (token && isTokenExpired(token)) {
+        setToken(null);
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
   }, [token]);
 
   const login = async (email: string, password: string) => {
@@ -33,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
   };
 
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!token && !isTokenExpired(token);
 
   return (
     <AuthContext.Provider value={{ token, login, logout, isAuthenticated }}>

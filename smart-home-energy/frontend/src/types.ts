@@ -6,10 +6,14 @@ export interface DevicePublic {
     owner_id: string;
   }
   
+  export interface HourlyEnergyUsage {
+    date: string;
+    hour: number;
+    total_energy: number;
+  }
+  
   export interface DeviceStats {
     device_id: string;
     time_period_days: number;
-    max_usage: number | null;
-    min_usage: number | null;
-    avg_usage: number | null;
+    hourly_usage: HourlyEnergyUsage[];
   }

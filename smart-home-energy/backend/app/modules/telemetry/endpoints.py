@@ -94,8 +94,8 @@ def get_device_stats(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get aggregated energy usage statistics (MIN, MAX, AVG) for a specific device
-    over a given number of past days.
+    Get daily energy usage summary for a specific device over a given number of past days.
+    Returns the sum of energy usage for each day.
     """
     # Security Check: Verify the device belongs to the current user
     device = db.query(Device).filter(Device.id == device_id, Device.owner_id == current_user.id).first()
@@ -105,20 +105,33 @@ def get_device_stats(
     # Calculate the time window
     start_date = datetime.now(timezone.utc) - timedelta(days=days)
 
-    # Query for the aggregated data
-    stats = db.query(
-        func.max(Telemetry.energy_usage).label("max_usage"),
-        func.min(Telemetry.energy_usage).label("min_usage"),
-        func.avg(Telemetry.energy_usage).label("avg_usage")
+    # Query for hourly aggregated energy usage
+    hourly_stats = db.query(
+        func.date(Telemetry.timestamp).label('date'),
+        func.extract('hour', Telemetry.timestamp).label('hour'),
+        func.sum(Telemetry.energy_usage).label('total_energy')
     ).filter(
         Telemetry.device_id == device_id,
         Telemetry.timestamp >= start_date
-    ).one()
+    ).group_by(
+        func.date(Telemetry.timestamp),
+        func.extract('hour', Telemetry.timestamp)
+    ).order_by(
+        func.date(Telemetry.timestamp).desc(),
+        func.extract('hour', Telemetry.timestamp).asc()
+    ).all()
+
+    # Convert to schema format
+    hourly_usage = [
+        schemas.HourlyEnergyUsage(
+            date=stat.date,
+            hour=stat.hour,
+            total_energy=stat.total_energy
+        ) for stat in hourly_stats
+    ]
 
     return schemas.DeviceStats(
         device_id=device_id,
         time_period_days=days,
-        max_usage=stats.max_usage,
-        min_usage=stats.min_usage,
-        avg_usage=stats.avg_usage
+        hourly_usage=hourly_usage
     )

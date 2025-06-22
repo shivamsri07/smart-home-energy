@@ -21,32 +21,46 @@ export default function DeviceDetailsPage() {
 
   if (!stats) return <div>Loading stats...</div>;
 
-  const chartData = [
-    { name: 'Min Usage', value: stats.min_usage || 0 },
-    { name: 'Avg Usage', value: stats.avg_usage || 0 },
-    { name: 'Max Usage', value: stats.max_usage || 0 },
-  ];
+  // Transform hourly usage data for the chart
+  const chartData = stats.hourly_usage.map(hour => ({
+    time: `${new Date(hour.date).toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    })} ${hour.hour}:00`,
+    energy: hour.total_energy,
+    hour: hour.hour,
+    date: hour.date
+  }));
 
   return (
     <div className="space-y-4">
-      <h2 className="text-3xl font-bold tracking-tight">Device Statistics</h2>
+      <h2 className="text-3xl font-bold tracking-tight">Device Energy Usage</h2>
       <p className="text-muted-foreground">
-        Showing stats for device <code className="bg-muted px-2 py-1 rounded">{deviceId}</code> for the last {stats.time_period_days} days.
+        Hourly energy consumption for device <code className="bg-muted px-2 py-1 rounded">{deviceId}</code> over the last {stats.time_period_days} days.
       </p>
       <Card>
         <CardHeader>
-          <CardTitle>Energy Usage (Watts)</CardTitle>
-          <CardDescription>A summary of the device's consumption.</CardDescription>
+          <CardTitle>Hourly Energy Usage (Watts)</CardTitle>
+          <CardDescription>Total energy consumption per hour.</CardDescription>
         </CardHeader>
         <CardContent className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
+              <XAxis 
+                dataKey="time" 
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                interval={0}
+              />
               <YAxis />
-              <Tooltip />
+              <Tooltip 
+                formatter={(value: number) => [`${value.toFixed(2)} Watts`, 'Energy Usage']}
+                labelFormatter={(label) => `Time: ${label}`}
+              />
               <Legend />
-              <Bar dataKey="value" fill="#8884d8" />
+              <Bar dataKey="energy" fill="#8884d8" name="Energy Usage (Watts)" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
