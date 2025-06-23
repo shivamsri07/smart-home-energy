@@ -63,6 +63,17 @@ export default function LoginPage() {
             <Button type="submit" className="w-full">Sign in</Button>
           </CardFooter>
         </form>
+        {/* Don't have an account register here */}
+        <div className="px-6 pb-4 text-center text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <Button
+            variant="link"
+            className="p-0 text-primary hover:underline"
+            onClick={() => navigate('/register')}
+          >
+            Register here
+          </Button>
+        </div>
       </Card>
     </div>
   );

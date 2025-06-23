@@ -36,7 +36,7 @@ def login_for_access_token(
     Authenticate user and return a JWT access token.
     """
     user = service.get_user_by_email(db, email=form_data.username)
-    if not user or not service.verify_password(form_data.password, user.password_hash):
+    if not user or not service.verify_password(form_data.password, str(user.password_hash)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",

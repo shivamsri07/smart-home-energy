@@ -2,6 +2,11 @@
 import axios from 'axios';
 
 // Define the types for our function arguments and response
+
+interface RegisterCredentials {
+  email: string
+  password: string
+}
 interface LoginCredentials {
   email: string;
   password: string;
@@ -35,4 +40,9 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthResp
     console.error('Login failed:', error);
     throw error;
   }
+};
+
+export const registerUser = async (credentials: RegisterCredentials): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/auth/register', credentials);
+  return response.data;
 };
