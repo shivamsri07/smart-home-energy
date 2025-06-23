@@ -1,6 +1,6 @@
 // src/api/deviceApi.ts
 import api from '@/lib/axios';
-import { DevicePublic, DeviceStats } from '@/types'; // We will define these types
+import { DevicePublic, DeviceStats, TimeWindow } from '@/types'; // We will define these types
 
 export const getDevices = async (): Promise<DevicePublic[]> => {
   const response = await api.get('/devices/');
@@ -12,7 +12,7 @@ export const createDevice = async (name: string, type: string = "APPLIANCE"): Pr
   return response.data;
 };
 
-export const getDeviceStats = async (deviceId: string, days: number = 7): Promise<DeviceStats> => {
-  const response = await api.get(`/devices/${deviceId}/stats?days=${days}`);
+export const getDeviceStats = async (deviceId: string, timeWindow: TimeWindow): Promise<DeviceStats> => {
+  const response = await api.get(`/devices/${deviceId}/stats?time_window=${timeWindow}`);
   return response.data;
 };

@@ -2,18 +2,19 @@
 export interface DevicePublic {
     id: string;
     name: string;
-    type: string;
     owner_id: string;
   }
   
-  export interface HourlyEnergyUsage {
-    date: string;
-    hour: number;
+  export type TimeWindow = "7d" | "12h" | "6h";
+  
+  export interface EnergyUsagePoint {
+    timestamp: string;
     total_energy: number;
+    label: string;
   }
   
   export interface DeviceStats {
     device_id: string;
-    time_period_days: number;
-    hourly_usage: HourlyEnergyUsage[];
+    time_window: TimeWindow;
+    data_points: EnergyUsagePoint[];
   }

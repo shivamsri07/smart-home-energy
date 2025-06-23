@@ -89,13 +89,15 @@ def list_user_devices(
 @device_router.get("/{device_id}/stats", response_model=schemas.DeviceStats)
 def get_device_stats(
     device_id: uuid.UUID,
-    days: int = 7, # Default to the last 7 days
+    time_window: schemas.TimeWindow,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get daily energy usage summary for a specific device over a given number of past days.
-    Returns the sum of energy usage for each day.
+    Get energy usage summary for a specific device over different time windows:
+    - 7d: Last 7 days data with daily aggregation (7 bars)
+    - 12h: Last 12 hours data with hourly aggregation (12 bars)
+    - 6h: Last 6 hours data with hourly aggregation (6 bars)
     """
     # Security Check: Verify the device belongs to the current user
     device = db.query(Device).filter(Device.id == device_id, Device.owner_id == current_user.id).first()
@@ -103,35 +105,59 @@ def get_device_stats(
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Device not found")
 
     # Calculate the time window
-    start_date = datetime.now(timezone.utc) - timedelta(days=days)
+    now = datetime.now(timezone.utc)
+    if time_window == schemas.TimeWindow.SEVEN_DAYS:
+        start_date = now - timedelta(days=7)
+        # For 7 days, we group by date
+        stats = db.query(
+            func.date_trunc('day', Telemetry.timestamp).label('timestamp'),
+            func.sum(Telemetry.energy_usage).label('total_energy')
+        ).filter(
+            Telemetry.device_id == device_id,
+            Telemetry.timestamp >= start_date
+        ).group_by(
+            func.date_trunc('day', Telemetry.timestamp)
+        ).order_by(
+            func.date_trunc('day', Telemetry.timestamp).desc()
+        ).all()
 
-    # Query for hourly aggregated energy usage
-    hourly_stats = db.query(
-        func.date(Telemetry.timestamp).label('date'),
-        func.extract('hour', Telemetry.timestamp).label('hour'),
-        func.sum(Telemetry.energy_usage).label('total_energy')
-    ).filter(
-        Telemetry.device_id == device_id,
-        Telemetry.timestamp >= start_date
-    ).group_by(
-        func.date(Telemetry.timestamp),
-        func.extract('hour', Telemetry.timestamp)
-    ).order_by(
-        func.date(Telemetry.timestamp).desc(),
-        func.extract('hour', Telemetry.timestamp).asc()
-    ).all()
+        # Convert to data points with day labels
+        data_points = [
+            schemas.EnergyUsagePoint(
+                timestamp=stat.timestamp,
+                total_energy=stat.total_energy,
+                label=stat.timestamp.strftime("%A")  # Day name
+            ) for stat in stats
+        ]
 
-    # Convert to schema format
-    hourly_usage = [
-        schemas.HourlyEnergyUsage(
-            date=stat.date,
-            hour=stat.hour,
-            total_energy=stat.total_energy
-        ) for stat in hourly_stats
-    ]
+    else:  # 12h or 6h
+        hours = 12 if time_window == schemas.TimeWindow.TWELVE_HOURS else 6
+        start_date = now - timedelta(hours=hours)
+        
+        # For hours, we group by hour
+        stats = db.query(
+            func.date_trunc('hour', Telemetry.timestamp).label('timestamp'),
+            func.sum(Telemetry.energy_usage).label('total_energy')
+        ).filter(
+            Telemetry.device_id == device_id,
+            Telemetry.timestamp >= start_date
+        ).group_by(
+            func.date_trunc('hour', Telemetry.timestamp)
+        ).order_by(
+            func.date_trunc('hour', Telemetry.timestamp).desc()
+        ).all()
+
+        # Convert to data points with hour labels
+        data_points = [
+            schemas.EnergyUsagePoint(
+                timestamp=stat.timestamp,
+                total_energy=stat.total_energy,
+                label=stat.timestamp.strftime("%H:00")  # Hour in 24-hour format
+            ) for stat in stats
+        ]
 
     return schemas.DeviceStats(
         device_id=device_id,
-        time_period_days=days,
-        hourly_usage=hourly_usage
+        time_window=time_window,
+        data_points=data_points
     )

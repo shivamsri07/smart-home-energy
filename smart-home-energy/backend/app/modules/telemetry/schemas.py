@@ -2,24 +2,31 @@
 
 import uuid
 from datetime import datetime, date
-from pydantic import BaseModel, Field
-from typing import List
+from pydantic import BaseModel, Field, UUID4
+from typing import List, Optional
+from enum import Enum
 
-class TelemetryCreate(BaseModel):
+class TimeWindow(str, Enum):
+    SEVEN_DAYS = "7d"
+    TWELVE_HOURS = "12h"
+    SIX_HOURS = "6h"
+
+class TelemetryBase(BaseModel):
+    device_id: UUID4
+    timestamp: datetime
+    energy_usage: float
+
+class TelemetryCreate(TelemetryBase):
     """
     Schema for a single telemetry data point payload.
     """
-    device_id: uuid.UUID = Field(..., alias="deviceId")
-    timestamp: datetime
-    energy_usage: float = Field(..., alias="energyWatts")
+    pass
 
-class TelemetryPublic(BaseModel):
+class TelemetryPublic(TelemetryBase):
     """
     Schema for representing a returned telemetry data point.
     """
-    device_id: uuid.UUID
-    timestamp: datetime
-    energy_usage: float
+    id: UUID4
 
     class Config:
         from_attributes = True
@@ -31,24 +38,21 @@ class DeviceCreate(BaseModel):
     type: str = "APPLIANCE"
 
 class DevicePublic(DeviceCreate):
-    id: uuid.UUID
-    owner_id: uuid.UUID
+    id: UUID4
+    owner_id: UUID4
 
     class Config:
         from_attributes = True
 
-class HourlyEnergyUsage(BaseModel):
-    """
-    Schema for hourly energy usage summary.
-    """
-    date: date
-    hour: int
+class EnergyUsagePoint(BaseModel):
+    timestamp: datetime
     total_energy: float
+    label: str  # "Monday", "Tuesday", etc. for days or "14:00", "15:00" etc. for hours
 
 class DeviceStats(BaseModel):
     """
     Schema for returning hourly energy usage data for a device.
     """
-    device_id: uuid.UUID
-    time_period_days: int
-    hourly_usage: List[HourlyEnergyUsage]
+    device_id: UUID4
+    time_window: TimeWindow
+    data_points: list[EnergyUsagePoint]

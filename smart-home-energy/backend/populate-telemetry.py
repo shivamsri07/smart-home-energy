@@ -11,7 +11,8 @@ from datetime import datetime, timedelta, timezone
 BASE_URL = "http://localhost:8000/api/v1"
 EMAIL = os.getenv("TEST_USER_EMAIL", "user_1@example.com")
 PASSWORD = os.getenv("TEST_USER_PASSWORD", "password")
-NUM_DEVICES = 5
+NUM_DEVICES = 3
+DAYS_OF_DATA = 7  # Generate 7 days of data
 
 def get_auth_token(email, password):
     """Logs in a user and returns their JWT access token."""
@@ -75,30 +76,43 @@ if __name__ == "__main__":
         # --- Main Data Generation Loop ---
         print("\nStarting telemetry data generation...")
         headers = {"Authorization": f"Bearer {auth_token}"}
-        start_of_today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
         
-        total_requests = len(device_ids_to_populate) * 24 * 60
+        # Calculate start date (7 days ago)
+        end_date = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+        start_date = end_date - timedelta(days=DAYS_OF_DATA)
+        
+        # Calculate total number of requests for progress tracking
+        total_requests = len(device_ids_to_populate) * 24 * 60 * DAYS_OF_DATA
         request_count = 0
         
-        # One reading per minute for 24 hours
-        for t in range(0, 24 * 60 * 60, 60):
-            ts = (start_of_today + timedelta(seconds=t)).isoformat().replace('+00:00', 'Z')
-            for dev_id in device_ids_to_populate:
-                request_count += 1
-                payload = {
-                    "deviceId": dev_id,
-                    "timestamp": ts,
-                    "energyWatts": round(random.uniform(5.0, 450.0), 4)
-                }
-                
-                try:
-                    requests.post(f"{BASE_URL}/telemetry/", headers=headers, json=payload, timeout=5)
-                    print(f"  ({request_count}/{total_requests}) Submitted data for device {dev_id[:8]} at {ts}")
-                except requests.exceptions.RequestException as e:
-                    print(f"  - Failed to submit data: {e}")
-                
-            # A small sleep to not overwhelm the server instantly
-            time.sleep(0.05)
+        # Generate data for each day
+        current_date = start_date
+        while current_date <= end_date:
+            print(f"\nGenerating data for {current_date.date()}")
+            
+            # One reading per hour for 24 hours
+            for t in range(0, 24 * 60, 60):
+                ts = (current_date + timedelta(seconds=t)).isoformat().replace('+00:00', 'Z')
+                for dev_id in device_ids_to_populate:
+                    request_count += 1
+                    
+                    payload = {
+                        "deviceId": dev_id,
+                        "timestamp": ts,
+                        "energyWatts": round(random.uniform(5.0, 450.0), 4)
+                    }
+                    
+                    try:
+                        requests.post(f"{BASE_URL}/telemetry/", headers=headers, json=payload, timeout=5)
+                        if request_count % 100 == 0:  # Print progress every 100 requests
+                            print(f"Progress: {request_count}/{total_requests} ({round(request_count/total_requests*100, 1)}%)")
+                    except requests.exceptions.RequestException as e:
+                        print(f"  - Failed to submit data: {e}")
+                    
+                # A small sleep to not overwhelm the server instantly
+                time.sleep(0.05)
+            
+            current_date += timedelta(days=1)
             
         print("\nData population script finished successfully.")
         
