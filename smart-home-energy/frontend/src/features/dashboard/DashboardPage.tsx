@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { getDevices } from "@/api/deviceApi";
 import { DevicePublic } from "@/types";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddDeviceDialog } from "./AddDeviceDialog";
 import { toast } from "sonner";
 import { Link } from "react-router-dom"; // For making cards clickable
@@ -34,7 +34,7 @@ export default function DashboardPage() {
               <Card className="hover:bg-muted/50 transition-colors">
                 <CardHeader>
                   <CardTitle>{device.name}</CardTitle>
-                  <CardDescription>{device.type}</CardDescription>
+                  {/* <CardDescription>{device.type}</CardDescription> */}
                 </CardHeader>
               </Card>
             </Link>
